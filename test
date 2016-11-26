@@ -1,0 +1,62 @@
+import math;
+import matplotlib.pyplot as plt;
+
+
+
+#Declare constant value: delta, eps
+delta = math.e  ** -5;
+eps =  math.e * (10 ** -4);
+
+#Declare the function get hash value of x with two parameter a,b
+def getHashValue(a, b, x, p, nbuckets):
+    y = x % p;
+    hash_val = (a * y + b) % p;
+    return hash_val % nbuckets;
+
+#Read hash parameter from file and save in hash_function
+fileName = "hash_params.txt";
+file_handle = open(fileName,"r");
+hash_function = [];
+number_hash_function = 0;
+for line in file_handle:
+    hash_function.append([int(x) for x in line.split()]);
+    number_hash_function += 1;
+
+#The main process
+nbuckets = int(math.e/eps);
+count = [[0 for x in range(nbuckets)] for y in range(number_hash_function)]
+fileName = "words_stream.txt";
+file_handle = open(fileName,"r");
+numberSample = 0;
+result = [];
+for line in file_handle:
+    u = [int(x) for x in line.split()];
+    for t in range(number_hash_function):
+        hash_value_u = getHashValue(int(hash_function[t][0]), int(hash_function[t][1]), u[0], 123457, nbuckets);
+        count[t][hash_value_u] += 1;
+    numberSample += 1;
+
+#Result
+fileName = "counts.txt";
+file_handle = open(fileName,"r");
+xcor = [];
+ycor = [];
+n = 0;
+for line in file_handle:
+    u,v = [int(x) for x in line.split()];
+    res = numberSample + 1;
+    for t in range(number_hash_function):
+        hash_value_u = getHashValue(hash_function[t][0], hash_function[t][1], u, 123457, nbuckets);
+        if (res > count[t][hash_value_u]):
+            res = count[t][hash_value_u];
+    n += 1;
+    xcor.append(float(v) / numberSample);
+    ycor.append(float(res - v) / v);
+
+
+plt.plot(xcor, ycor, "ro");
+plt.xscale("log");
+plt.yscale("log");
+plt.xlabel("x");
+plt.ylabel("y");
+plt.show();
